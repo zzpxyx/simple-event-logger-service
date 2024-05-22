@@ -1,26 +1,57 @@
-import express from "express";
+import express = require("express");
+import { Database } from "sqlite3";
 
+type Event = {
+  timestamp: number;
+  name: string;
+  memo: string;
+};
+
+type EventWithId = { id: number } & Event;
+
+const db = new Database("db.sqlite");
 const port = 3000;
 const app = express();
 
 app.use(express.json());
 
-type Event = {
-  timestamp: number;
-  event: string;
-  memo: string;
-};
-
-const db: Event[] = [];
-
 app.get("/v1/events", (_req, res) => {
-  res.status(200).json(db);
+  db.all("select * from events;", function (err, rows) {
+    if (err) {
+      res.status(500).send("Error retrieving data from database.");
+    } else {
+      res.status(200).json(rows);
+    }
+  });
 });
 
 app.post("/v1/events", (req, res) => {
   const event: Event = req.body;
-  db.push(event);
-  res.status(200).send();
+  db.run(
+    "insert into events(timestamp, name, memo) values(?, ?, ?);",
+    [event.timestamp, event.name, event.memo],
+    function (err) {
+      if (err) {
+        res.status(500).send("Error inserting data into database.");
+      } else {
+        const insertedEvent: EventWithId = {
+          id: this.lastID,
+          ...event,
+        };
+        res.status(200).json(insertedEvent);
+      }
+    }
+  );
+});
+
+app.delete("/v1/events/:id", (req, res) => {
+  db.run("delete from events where id=?", [req.params.id], function (err) {
+    if (err) {
+      res.status(500).send("Error deleting data from database.");
+    } else {
+      res.status(200).send();
+    }
+  });
 });
 
 app.listen(port, () => {
