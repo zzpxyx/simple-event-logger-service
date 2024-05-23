@@ -1,5 +1,6 @@
 import express = require("express");
 import { Database } from "sqlite3";
+import cors = require("cors");
 
 type Event = {
   timestamp: number;
@@ -14,6 +15,7 @@ const port = 3000;
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 app.get("/v1/events", (_req, res) => {
   db.all("select * from events;", function (err, rows) {
