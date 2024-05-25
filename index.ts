@@ -18,13 +18,16 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/v1/events", (_req, res) => {
-  db.all("select * from events;", function (err, rows) {
-    if (err) {
-      res.status(500).send("Error retrieving data from database.");
-    } else {
-      res.status(200).json(rows);
+  db.all(
+    "select id, timestamp, name, memo from events where deleted is null;",
+    function (err, rows) {
+      if (err) {
+        res.status(500).send("Error retrieving data from database.");
+      } else {
+        res.status(200).json(rows);
+      }
     }
-  });
+  );
 });
 
 app.post("/v1/events", (req, res) => {
@@ -47,13 +50,17 @@ app.post("/v1/events", (req, res) => {
 });
 
 app.delete("/v1/events/:id", (req, res) => {
-  db.run("delete from events where id=?", [req.params.id], function (err) {
-    if (err) {
-      res.status(500).send("Error deleting data from database.");
-    } else {
-      res.status(200).send();
+  db.run(
+    "update events set deleted=true where id=?;",
+    [req.params.id],
+    function (err) {
+      if (err) {
+        res.status(500).send("Error deleting data from database.");
+      } else {
+        res.status(200).send();
+      }
     }
-  });
+  );
 });
 
 app.listen(port, () => {
