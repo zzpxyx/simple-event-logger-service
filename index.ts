@@ -17,14 +17,20 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get("/v1/events", (_req, res) => {
+app.get("/v1/events", (req, res) => {
+  const offsetPossibleNaN = Number(req.query.offset?.toString() ?? "");
+  const offset = isNaN(offsetPossibleNaN) ? 0 : offsetPossibleNaN;
   db.all(
-    "select id, timestamp, name, memo from events where deleted is null;",
+    "select id, timestamp, name, memo from events " +
+      "where deleted is null " +
+      "order by timestamp desc, id desc " +
+      "limit 10 offset ?;",
+    offset,
     function (err, rows) {
       if (err) {
         res.status(500).send("Error retrieving data from database.");
       } else {
-        res.status(200).json(rows);
+        res.status(200).json(rows.reverse()); // Earlier events first.
       }
     }
   );
