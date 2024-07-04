@@ -9,7 +9,7 @@ This repo is the backend code for Simple Event Logger. The front code is located
 ## Features
 
 - Use SQLite database.
-- Provide RESTful API.
+- Provide RESTful APIs.
 
 ## Limitations and Areas for Improvement
 
