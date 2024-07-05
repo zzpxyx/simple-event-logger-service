@@ -72,3 +72,11 @@ Why? Well, [just for fun](https://www.zzpxyx.com/posts/repurposing-an-old-androi
 Check out the `android-6` branch. The major difference there is using TypeScript v4.9.5 as that's the last version working on Node.js v12 (the LTS version provided in Android 6's Termux).
 
 Also note that the `sqlite3` package will be [built from the source](https://www.npmjs.com/package/sqlite3#source-install) during `npm install`. Install missing build tools like `python`, `make`, and `clang` according to the error messages. The build will take a long time, like 10 minutes.
+
+If the `sqlite3` packages builds fine but crashes after launching the service, try rebuild it with `libsqlite`:
+
+```
+npm install sqlite3 --build-from-source --sqlite=/usr/lib
+```
+
+Remember to change the `--sqlite` to point to your `libsqlite`. `libsqlite` should already be installed when you set up SQLite.
